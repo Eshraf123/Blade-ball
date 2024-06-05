@@ -1,0 +1,146 @@
+-- Blade Ball Roblox Script with multiple features
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+
+-- Variables
+local LocalPlayer = Players.LocalPlayer
+local autoParryEnabled = true
+local spamParryEnabled = true
+local curveBallEnabled = true
+local autoFarmEnabled = true
+local ESPColor = Color3.fromRGB(255, 0, 0) -- Red
+local ESPDistance = 1000
+
+-- ESP Functionality
+local function createESP(player)
+    if player ~= LocalPlayer then
+        local highlight = Instance.new("Highlight")
+        highlight.Adornee = player.Character
+        highlight.FillColor = ESPColor
+        highlight.FillTransparency = 0.5
+        highlight.OutlineColor = ESPColor
+        highlight.OutlineTransparency = 0
+        highlight.Parent = player.Character
+    end
+end
+
+local function updateESP()
+    for _, player in ipairs(Players:GetPlayers()) do
+        createESP(player)
+    end
+    Players.PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function()
+            createESP(player)
+        end)
+    end)
+    Players.PlayerRemoving:Connect(function(player)
+        if player.Character then
+            for _, v in pairs(player.Character:GetChildren()) do
+                if v:IsA("Highlight") then
+                    v:Destroy()
+                end
+            end
+        end
+    end)
+end
+
+-- Autoparry Functionality
+local function autoParry()
+    RunService.RenderStepped:Connect(function()
+        if autoParryEnabled then
+            for _, ball in ipairs(Workspace:GetChildren()) do
+                if ball.Name == "BladeBall" and ball:IsA("Part") then
+                    local distance = (ball.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if distance < 10 then
+                        fireclickdetector(ball:FindFirstChildOfClass("ClickDetector"))
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- Spam Parry Functionality
+local function spamParry()
+    RunService.RenderStepped:Connect(function()
+        if spamParryEnabled then
+            for _, ball in ipairs(Workspace:GetChildren()) do
+                if ball.Name == "BladeBall" and ball:IsA("Part") then
+                    fireclickdetector(ball:FindFirstChildOfClass("ClickDetector"))
+                end
+            end
+        end
+    end)
+end
+
+-- Curve Ball Functionality (Placeholder)
+local function curveBall()
+    if curveBallEnabled then
+        -- Add your curve ball functionality here
+    end
+end
+
+-- Auto Farm Functionality (Placeholder)
+local function autoFarm()
+    if autoFarmEnabled then
+        -- Add your auto farm functionality here
+    end
+end
+
+-- Function to look at the ball
+local function lookAtBall()
+    RunService.RenderStepped:Connect(function()
+        for _, ball in ipairs(Workspace:GetChildren()) do
+            if ball.Name == "BladeBall" and ball:IsA("Part") then
+                local direction = (ball.Position - LocalPlayer.Character.HumanoidRootPart.Position).Unit
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(LocalPlayer.Character.HumanoidRootPart.Position, ball.Position)
+            end
+        end
+    end)
+end
+
+-- Function to walk to the nearest player
+local function walkToNearestPlayer()
+    RunService.RenderStepped:Connect(function()
+        local nearestPlayer, minDistance = nil, math.huge
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local distance = (player.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                if distance < minDistance then
+                    nearestPlayer = player
+                    minDistance = distance
+                end
+            end
+        end
+        if nearestPlayer then
+            LocalPlayer.Character.Humanoid:MoveTo(nearestPlayer.Character.HumanoidRootPart.Position)
+        end
+    end)
+end
+
+-- Function to walk to the ball
+local function walkToBall()
+    RunService.RenderStepped:Connect(function()
+        for _, ball in ipairs(Workspace:GetChildren()) do
+            if ball.Name == "BladeBall" and ball:IsA("Part") then
+                LocalPlayer.Character.Humanoid:MoveTo(ball.Position)
+            end
+        end
+    end)
+end
+
+-- Activate Features
+updateESP()
+autoParry()
+spamParry()
+curveBall()
+autoFarm()
+lookAtBall()
+walkToNearestPlayer()
+walkToBall()
+
+print("Blade Ball Script Activated")
